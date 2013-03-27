@@ -122,13 +122,11 @@ public class MachinePlayer extends Player {
     // illegal, returns false without modifying the internal state of "this"
     // player.  This method allows your opponents to inform you of their moves.
     public boolean opponentMove(Move m) { //Anting
-        /*if (isValid(m, otherColor(color))){
-            
+        if (isValid(m, otherColor(color))){
+        	updateBoard(m, otherColor(color));
             return true;
         }
-    	return false;*/
-    	updateBoard(m, otherColor(color));
-    	return true;
+    	return false;
     }
 
     // If the Move m is legal, records the move as a move by "this" player
@@ -145,15 +143,31 @@ public class MachinePlayer extends Player {
     	/**
     	 * look at target square (applies to both ADD & STEP moves). Get a list of neighbors. 
     	 * for each neighbor, recursively call minNeighborChain(board, minChain + 1), while temp removing target square to avoid 
-    	 * cycle. If minChain > 2, return false for isValid. 
+    	 * cycle. If minChain > 2, return false for isValid. Also directly check if neighbors > 1 (to eliminate obvious invalid cases)
     	 * Helper function: minNeighborChain(Board board, int minChain = 0) 
     	 * Base case: if no list of neighbors, return 1
     	 */
-    	int[] coords = {m.x1, m.x2};
-    	if (minNeighborChain(0, coords, side) < 2) {
-    		return true;
+    	int[] coords = {m.x1, m.y1};
+    	int index = coordsToIndex(coords);
+		int neighbors = 0;
+		HashTableChained invalidCells = getInvalidCells(side);
+		if (invalidCells.hasKey(index) || board[index] == BLACK || board[index] == WHITE) {
+			return false;
+		}
+		//to improve code, simplify 2x for-loop -> iterating thru single array
+		for (int x = coords[0] - 1; x <= coords[0] + 1; x++) {
+			for (int y = coords[1] - 1; y <= coords[1] + 1; y++) {
+				if (!(x == coords[0] && y == coords[1]) && inBounds(x, y, coordsToIndex(x, y))) {
+					if (board[coordsToIndex(x, y)] == side) {
+						neighbors += 1;
+					}
+				}
+			}
+		}
+    	if (neighbors > 1 || minNeighborChain(0, coords, side) >= 2) {
+    		return false;
     	}
-        return false;
+        return true;
     }
     
     /**
@@ -163,7 +177,7 @@ public class MachinePlayer extends Player {
      * @return int
      */
     protected int minNeighborChain(int min_chain, int[] coords, byte side) {
-    	if (min_chain >= 2) 
+    	if (min_chain >= 2) //"end" case
     		return min_chain;
     	
     	int[] potential_neighbors = new int[8]; //assume max size 8
@@ -171,49 +185,41 @@ public class MachinePlayer extends Player {
     		potential_neighbors[i] = -1;
     	}
     	int neighbor_count = 0;
-    	int k = 0;
     	for (int x = coords[0] - 1; x <= coords[0] + 1; x++) {
 			for (int y = coords[1] - 1; y <= coords[1] + 1; y++) {
 				int index = coordsToIndex(x, y);
 				if (!(x == coords[0] && y == coords[1]) && inBounds(x, y, index)) {
 					if (board[index] == side) {
-						potential_neighbors[k] = index;
+						potential_neighbors[neighbor_count] = index;
 						neighbor_count++;
-						k++;
 					} 
 				} 
 			}
 		}
-    	if (neighbor_count == 0)
+   
+    	if (neighbor_count == 0) //base case
     		return min_chain;
-  
-    	//make neighbors_arr with just the right # of elements
-    	int[] neighbors = new int[neighbor_count]; 
-    	int l = 0;
-    	for (int i = 0; i < 8; i++) {
-    		if (potential_neighbors[i] != -1) {
-    			neighbors[l] = potential_neighbors[i];
-    			l++;
-    		}
-    	}
+    
     	int chainLen = 0;
-    	for (int i = 0; i < neighbor_count; i++) {
-    		int[] new_coords = indexToCoords(neighbors[i]);
+    	for (int i = 0; i < 8; i++) {
+    		if (potential_neighbors[i] == -1) { //not a neighbor so no need to investigate further
+    			continue; }
+    		int[] new_coords = indexToCoords(potential_neighbors[i]);
     		int old_coords_index = coordsToIndex(coords);
     		if (min_chain == 0) { //first cell in chain is already empty, so don't do remove/add 
     			chainLen = minNeighborChain(min_chain + 1, new_coords, side);
     		} else {
     			board[old_coords_index] = EMPTY; //temp remove curr coord to avoid double-counting
         		chainLen = minNeighborChain(min_chain + 1, new_coords, side);
-        		board[old_coords_index] = side;
+        		board[old_coords_index] = side; //rest curr coord to orig value
     		}
-    		if (chainLen >= 2) {
+    		if (chainLen >= 2) 
     			return chainLen;
-    		}
     	}
+    	//may return inaccuate minNeighborChain if no chainLen >= 2 (since chainLen takes on value of investigation of last neighbor in list)
+    	//but this doesn't matter for our purposes
     	return chainLen;
     }
-    
    
     /**
      * @return: list of valid moves (for given side)

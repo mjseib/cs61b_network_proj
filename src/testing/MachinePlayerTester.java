@@ -63,25 +63,25 @@ public class MachinePlayerTester extends MachinePlayer {
 	
 	private void testMinNeighborChain() {
 		System.out.println("Testing minNeighborChain.");
-		System.out.println(minNeighborChain(0, new int[] {1, 5}, BLACK));
+		System.out.println("At (1, 5): " + minNeighborChain(0, new int[] {1, 5}, BLACK));
 		System.out.println(getBoardGraphic());
 		printChipsLeft();
-        System.out.println(minNeighborChain(0, new int[] {4, 1}, BLACK));
+        System.out.println("At (4, 1): " + minNeighborChain(0, new int[] {4, 1}, BLACK));
         System.out.println(getBoardGraphic());
         printChipsLeft();
-        System.out.println(minNeighborChain(0, new int[] {4, 2}, BLACK));
+        System.out.println("At (4, 2): " + minNeighborChain(0, new int[] {4, 2}, BLACK));
         System.out.println(getBoardGraphic());
         printChipsLeft();
-        System.out.println(minNeighborChain(0, new int[] {6, 3}, BLACK));
+        System.out.println("At (6, 3): " + minNeighborChain(0, new int[] {6, 3}, BLACK));
         System.out.println(getBoardGraphic());
         printChipsLeft();
-        System.out.println(minNeighborChain(0, new int[] {3, 4}, BLACK)); 
+        System.out.println("At (3, 4): " + minNeighborChain(0, new int[] {3, 4}, BLACK)); 
         System.out.println(getBoardGraphic());
         printChipsLeft();
-        System.out.println(minNeighborChain(0, new int[] {3, 4}, WHITE)); 
+        System.out.println("At (3, 4) for WHITE: " + minNeighborChain(0, new int[] {3, 4}, WHITE)); 
         System.out.println(getBoardGraphic());
         printChipsLeft();
-        System.out.println(minNeighborChain(0, new int[] {2, 6}, WHITE)); 
+        System.out.println("At (2, 6) for BLACK: " + minNeighborChain(0, new int[] {2, 6}, WHITE)); 
         System.out.println(getBoardGraphic());
         printChipsLeft();
 	}
@@ -93,6 +93,20 @@ public class MachinePlayerTester extends MachinePlayer {
 		System.out.println(b);
 		printChipsLeft();
 		System.out.println("------------------------------------------------");
+	}
+	
+	private void testIsValidMove() {
+		System.out.println("Testing isValidMove.");
+		Move move1 = new Move(1, 5);
+		Move move2 = new Move(4, 1);
+		Move move3 = new Move(4, 2);
+		Move move4 = new Move(6, 3);
+		Move move5 = new Move(3, 4);
+		System.out.println("Is valid " + move1 + "? " + isValid(move1, BLACK));
+		System.out.println("Is valid " + move2 + "? " + isValid(move2, BLACK));
+		System.out.println("Is valid " + move3 + "? " + isValid(move3, BLACK));
+		System.out.println("Is valid " + move4 + "? " + isValid(move4, BLACK));
+		System.out.println("Is valid " + move5 + "? " + isValid(move5, BLACK));
 	}
 	
 	private void testValidMoves() {
@@ -144,10 +158,11 @@ public class MachinePlayerTester extends MachinePlayer {
         //printAddMoves(white_moves);
         
         //m.testValidMoves();
-		//m.testMinNeighborChain();
+		m.testMinNeighborChain();
+		m.testIsValidMove();
         //m.testAlphaBetaSearch();
         
-		System.out.println(m2.getBoardGraphic());
+		//System.out.println(m2.getBoardGraphic());
 		//m2.testValidMoves();
         //m2.testAlphaBetaSearch();
 		//m2.printMove(m2.chooseMove());
